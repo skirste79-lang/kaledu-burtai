@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 Slaptasis Kalėdų Senelis | Burtų traukimas</title>
+    <style>
+        :root {
+            --red: #b91c1c;
+            --dark-red: #7f1d1d;
+            --green: #15803d;
+            --dark-green: #14532d;
+            --gold: #d97706;
+            --bg: #fefce8;
+            --card: #ffffff;
+            --text: #1f2937;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #14532d 0%, #7f1d1d 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .container {
+            background: var(--card);
+            max-width: 720px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: var(--red);
+            margin-top: 0;
+            font-size: 2rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 25px;
+        }
+        .section {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        input[type="text"], input[type="number"], select {
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            flex: 1;
+            min-width: 150px;
+        }
+        button {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: var(--dark-green); }
+        button.btn-red { background: var(--red); }
+        button.btn-red:hover { background: var(--dark-red); }
+        button.btn-gold { background: var(--gold); }
+        button.btn-gold:hover { background: #b45309; }
+        button.btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .tag {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .tag.pair {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .tag span.remove {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+        .tag span.remove:hover { opacity: 1; }
+
+        .big-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: var(--red);
+            margin-top: 10px;
+        }
+        .big-btn:hover { background: var(--dark-red); }
+
+        .result-card {
+            background: #fffbeb;
+            border: 2px dashed var(--gold);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .error {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-weight: 500;
+        }
+        /* Gavėjo peržiūros langas */
+        .reveal-box {
+            text-align: center;
+            padding: 30px 15px;
+        }
+        .reveal-target {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--red);
+            margin: 20px 0;
+            padding: 20px;
+            background: #fef2f2;
+            border-radius: 16px;
+            border: 2px solid #fecaca;
+        }
+        .info-pill {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ORGANIZATORIAUS LANGAS -->
+    <div id="organizerView">
+        <h1>🎄 Slaptasis Kalėdų Senelis</h1>
+        <p class="subtitle">Suveskite dalyvius, pažymėkite šeimos poras ir sugeneruokite slaptas nuorodas kiekvienam!</p>
+
+        <div id="errorBox" class="error"></div>
+
+        <!-- 1. Dalyviai -->
+        <div class="section">
+            <h2>1. Dalyvių sąrašas</h2>
+            <div class="row">
+                <input type="text" id="nameInput" placeholder="Įveskite vardą (pvz., Jonas)" onkeypress="if(event.key==='Enter') addParticipant()">
+                <button onclick="addParticipant()">+ Pridėti</button>
+                <button class="btn-red btn-sm" onclick="clearAll()">Išvalyti visus</button>
+            </div>
+            <div id="participantsList" class="tag-list"></div>
+        </div>
+
+        <!-- 2. Poros / Išimtys -->
+        <div class="section">
+            <h2>2. Šeimos poros (kas ko NEGALI ištraukti)</h2>
+            <p style="font-size: 0.9rem; color: #6b7280; margin-top: 0;">Pažymėkite sutuoktinius ar poras, kad jie neištrauktų vienas kito.</p>
+            <div class="row">
+                <select id="person1"></select>
+                <span style="align-self: center; font-weight: bold;">↔</span>
+                <select id="person2"></select>
+                <button class="btn-gold" onclick="addExclusion()">Pridėti porą</button>
+            </div>
+            <div id="exclusionsList" class="tag-list"></div>
+        </div>
+
+        <!-- 3. Biudžetas ir tema -->
+        <div class="section">
+            <h2>3. Dovanos biudžetas ir tema</h2>
+            <div class="row">
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="font-size: 0.85rem; font-weight: bold;">Biudžetas (€):</label>
+                    <input type="number" id="budgetInput" value="20" style="width: 100%; margin-top: 4px;">
+                </div>
+                <div style="flex: 2; min-width: 220px;">
+                    <label style="font-size: 0.85rem; font-weight: bold;">Dovanos tema:</label>
+                    <select id="themeSelect" onchange="toggleCustomTheme()" style="width: 100%; margin-top: 4px;">
+                        <option value="Kažkas šilto ir jaukaus žiemai">🧣 Kažkas šilto ir jaukaus žiemai</option>
+                        <option value="Dovana iš pirmosios gavėjo vardo raidės">🔤 Dovana iš pirmosios gavėjo vardo raidės</option>
+                        <option value="Valgoma arba geriama dovana (gurmaniška)">🍫 Valgoma arba geriama dovana (gurmaniška)</option>
+                        <option value="Stalo žaidimas arba galvosūkis">🎲 Stalo žaidimas arba galvosūkis</option>
+                        <option value="Tik lietuviška (pagaminta Lietuvoje)">🇱🇹 Tik lietuviška (pagaminta Lietuvoje)</option>
+                        <option value="Juokinga arba netikėta dovana su humoru">😂 Juokinga dovana su humoru</option>
+                        <option value="custom">✏️ Įrašyti savo temą...</option>
+                    </select>
+                </div>
+            </div>
+            <input type="text" id="customThemeInput" class="hidden" placeholder="Įrašykite savo sugalvotą temą..." style="width: 100%; margin-top: 8px;">
+        </div>
+
+        <button class="big-btn" onclick="drawNames()">🎅 Traukti Kalėdų burtus!</button>
+
+        <!-- Rezultatai -->
+        <div id="resultsSection" class="section hidden" style="margin-top: 25px; background: #fff;">
+            <h2>🎁 Sugeneruotos slaptos nuorodos</h2>
+            <p style="font-size: 0.9rem; color: #4b5563;">Nukopijuokite kiekvieno dalyvio žinutę ir išsiųskite asmeniškai per Messenger, WhatsApp ar SMS. Jūs patys nematysite, kas ką ištraukė!</p>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <!-- DALYVIO REZULTATO LANGAS (Kai atsidaro savo nuorodą) -->
+    <div id="revealView" class="reveal-box hidden">
+        <h1>🎄 Sveikas(-a), <span id="revGiver"></span>!</h1>
+        <p style="font-size: 1.1rem; color: #4b5563;">Kalėdų burtai ištraukti! Šiais metais slaptą dovaną ruoši:</p>
+        
+        <div id="hiddenGiftBox">
+            <button class="big-btn" onclick="showSecret()" style="max-width: 320px;">🎁 Atidaryti ir sužinoti kam!</button>
+        </div>
+
+        <div id="revealedContent" class="hidden">
+            <div class="reveal-target" id="revReceiver"></div>
+            <div>
+                <div class="info-pill">💰 Biudžetas: <span id="revBudget"></span> €</div>
+                <div class="info-pill">✨ Tema: <span id="revTheme"></span></div>
+            </div>
+            <p style="margin-top: 25px; font-size: 0.9rem; color: #6b7280;">🤫 Išsaugok paslaptį iki pat Kalėdų susibūrimo!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Pradiniai pavyzdiniai duomenys
+    let participants = ["Jonas", "Ona", "Petras", "Marytė", "Tomas", "Ieva"];
+    let exclusions = [
+        ["Jonas", "Ona"],
+        ["Petras", "Marytė"]
+    ];
+
+    // UTF-8 saugus kodavimas į Base64 (kad veiktų lietuviškos raidės ąčęėįšųūž)
+    function encodeData(obj) {
+        const str = JSON.stringify(obj);
+        const bytes = new TextEncoder().encode(str);
+        let binString = "";
+        bytes.forEach((b) => binString += String.fromCharCode(b));
+        return btoa(binString);
+    }
+
+    function decodeData(base64) {
+        const binString = atob(base64);
+        const bytes = new Uint8Array(binString.length);
+        for (let i = 0; i < binString.length; i++) {
+            bytes[i] = binString.charCodeAt(i);
+        }
+        const str = new TextDecoder().decode(bytes);
+        return JSON.parse(str);
+    }
+
+    // Patikriname, ar puslapis atidarytas su slapta nuoroda (?d=...)
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataParam = urlParams.get('d');
+        
+        if (dataParam) {
+            try {
+                const data = decodeData(dataParam);
+                document.getElementById('organizerView').classList.add('hidden');
+                document.getElementById('revealView').classList.remove('hidden');
+                
+                document.getElementById('revGiver').textContent = data.g;
+                document.getElementById('revReceiver').textContent = "🎁 " + data.r;
+                document.getElementById('revBudget').textContent = data.b;
+                document.getElementById('revTheme').textContent = data.t;
+            } catch (e) {
+                alert("Neteisinga arba sugadinta nuoroda!");
+            }
+        } else {
+            renderUI();
+        }
+    };
+
+    function showSecret() {
+        document.getElementById('hiddenGiftBox').classList.add('hidden');
+        document.getElementById('revealedContent').classList.remove('hidden');
+    }
+
+    function toggleCustomTheme() {
+        const select = document.getElementById('themeSelect');
+        const customInput = document.getElementById('customThemeInput');
+        if (select.value === 'custom') {
+            customInput.classList.remove('hidden');
+        } else {
+            customInput.classList.add('hidden');
+        }
+    }
+
+    function addParticipant() {
+        const input = document.getElementById('nameInput');
+        const name = input.value.trim();
+        if (!name) return;
+        if (participants.includes(name)) {
+            showError("Toks vardas jau yra sąraše! Pridėkite pavardės raidę (pvz., Jonas K.).");
+            return;
+        }
+        hideError();
+        participants.push(name);
+        input.value = '';
+        renderUI();
+    }
+
+    function removeParticipant(name) {
+        participants = participants.filter(p => p !== name);
+        exclusions = exclusions.filter(pair => !pair.includes(name));
+        renderUI();
+    }
+
+    function clearAll() {
+        participants = [];
+        exclusions = [];
+        document.getElementById('resultsSection').classList.add('hidden');
+        renderUI();
+    }
+
+    function addExclusion() {
+        const p1 = document.getElementById('person1').value;
+        const p2 = document.getElementById('person2').value;
+        if (!p1 || !p2 || p1 === p2) {
+            showError("Pasirinkite du skirtingus žmones.");
+            return;
+        }
+        const exists = exclusions.some(pair => 
+            (pair[0] === p1 && pair[1] === p2) || (pair[0] === p2 && pair[1] === p1)
+        );
+        if (exists) {
+            showError("Ši pora jau pažymėta!");
+            return;
+        }
+        hideError();
+        exclusions.push([p1, p2]);
+        renderUI();
+    }
+
+    function removeExclusion(index) {
+        exclusions.splice(index, 1);
+        renderUI();
+    }
+
+    function renderUI() {
+        // Atvaizduojame dalyvius
+        const list = document.getElementById('participantsList');
+        list.innerHTML = participants.map(p => `
+            <div class="tag">
+                ${p} <span class="remove" onclick="removeParticipant('${p.replace(/'/g, "\\'")}')">✕</span>
+            </div>
+        `).join('');
+
+        // Atnaujiname porų pasirinkimo laukelius
+        const s1 = document.getElementById('person1');
+        const s2 = document.getElementById('person2');
+        const options = participants.map(p => `<option value="${p}">${p}</option>`).join('');
+        s1.innerHTML = options;
+        s2.innerHTML = options;
+        if (participants.length > 1) s2.selectedIndex = 1;
+
+        // Atvaizduojame išimtis
+        const exList = document.getElementById('exclusionsList');
+        exList.innerHTML = exclusions.map((pair, idx) => `
+            <div class="tag pair">
+                💑 ${pair[0]} ↔ ${pair[1]} <span class="remove" onclick="removeExclusion(${idx})">✕</span>
+            </div>
+        `).join('');
+    }
+
+    function isExcluded(giver, receiver) {
+        if (giver === receiver) return true;
+        return exclusions.some(pair => 
+            (pair[0] === giver && pair[1] === receiver) || 
+            (pair[0] === receiver && pair[1] === giver)
+        );
+    }
+
+    function drawNames() {
+        hideError();
+        if (participants.length < 3) {
+            showError("Reikia bent 3 dalyvių, kad būtų galima traukti burtus!");
+            return;
+        }
+
+        let receivers = [];
+        let success = false;
+
+        // Bandome sumaišyti iki 2000 kartų, kol rasime variantą be konfliktų
+        for (let attempt = 0; attempt < 2000; attempt++) {
+            receivers = [...participants];
+            // Fisher-Yates maišymas
+            for (let i = receivers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [receivers[i], receivers[j]] = [receivers[j], receivers[i]];
+            }
+
+            let valid = true;
+            for (let i = 0; i < participants.length; i++) {
+                if (isExcluded(participants[i], receivers[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if (valid) {
+                success = true;
+                break;
+            }
+        }
+
+        if (!success) {
+            showError("Nepavyko ištraukti burtų su šiomis porų taisyklėmis. Patikrinkite, ar nėra per daug apribojimų (pvz., vienas žmogus negali ištraukti visų kitų).");
+            return;
+        }
+
+        const budget = document.getElementById('budgetInput').value || "20";
+        const themeSelect = document.getElementById('themeSelect');
+        const theme = themeSelect.value === 'custom' 
+            ? (document.getElementById('customThemeInput').value.trim() || "Laisva tema")
+            : themeSelect.value;
+
+        const baseUrl = window.location.href.split('?')[0];
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = "";
+
+        participants.forEach((giver, index) => {
+            const receiver = receivers[index];
+            const payload = { g: giver, r: receiver, b: budget, t: theme };
+            const encoded = encodeData(payload);
+            const secretLink = `${baseUrl}?d=${encoded}`;
+            const messageText = `🎄 Labas, ${giver}! Štai tavo slapta Kalėdų burtų nuoroda (spausk ir sužinok, kam pirksi dovaną iki ${budget} €): ${secretLink}`;
+
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+                <div>
+                    <strong style="font-size: 1.1rem;">🎅 ${giver}</strong>
+                    <div style="font-size: 0.85rem; color: #6b7280;">Slapta nuoroda paruošta</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-sm" onclick="copyText(this, '${messageText.replace(/'/g, "\\'")}')">📋 Kopijuoti žinutę dalyviui</button>
+                </div>
+            `;
+            resultsList.appendChild(card);
+        });
+
+        document.getElementById('resultsSection').classList.remove('hidden');
+    }
+
+    function copyText(btn, text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const original = btn.textContent;
+            btn.textContent = "✅ Nukopijuota!";
+            btn.style.background = "#0284c7";
+            setTimeout(() => {
+                btn.textContent = original;
+                btn.style.background = "";
+            }, 2000);
+        });
+    }
+
+    function showError(msg) {
+        const box = document.getElementById('errorBox');
+        box.textContent = "⚠️ " + msg;
+        box.style.display = "block";
+    }
+
+    function hideError() {
+        document.getElementById('errorBox').style.display = "none";
+    }
+</script>
+
+</body>
+</html>
